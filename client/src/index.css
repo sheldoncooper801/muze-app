@@ -1,0 +1,218 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* MUZE Palette — Deep purple/violet music brand */
+    --background: 260 20% 6%;
+    --foreground: 270 10% 92%;
+
+    --card: 260 18% 9%;
+    --card-foreground: 270 10% 92%;
+
+    --popover: 260 18% 9%;
+    --popover-foreground: 270 10% 92%;
+
+    --primary: 270 85% 65%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 260 15% 16%;
+    --secondary-foreground: 270 10% 80%;
+
+    --muted: 260 15% 14%;
+    --muted-foreground: 270 8% 55%;
+
+    --accent: 340 75% 60%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 260 15% 18%;
+    --input: 260 15% 16%;
+    --ring: 270 85% 65%;
+
+    --radius: 0.75rem;
+
+    /* Chart colors */
+    --chart-1: 270 85% 65%;
+    --chart-2: 340 75% 60%;
+    --chart-3: 200 70% 55%;
+    --chart-4: 45 95% 65%;
+    --chart-5: 120 55% 50%;
+  }
+
+  /* MUZE is dark-first — same values for light mode (dark brand) */
+  .dark {
+    --background: 260 20% 6%;
+    --foreground: 270 10% 92%;
+    --card: 260 18% 9%;
+    --card-foreground: 270 10% 92%;
+    --popover: 260 18% 9%;
+    --popover-foreground: 270 10% 92%;
+    --primary: 270 85% 65%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 260 15% 16%;
+    --secondary-foreground: 270 10% 80%;
+    --muted: 260 15% 14%;
+    --muted-foreground: 270 8% 55%;
+    --accent: 340 75% 60%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 260 15% 18%;
+    --input: 260 15% 16%;
+    --ring: 270 85% 65%;
+    --chart-1: 270 85% 65%;
+    --chart-2: 340 75% 60%;
+    --chart-3: 200 70% 55%;
+    --chart-4: 45 95% 65%;
+    --chart-5: 120 55% 50%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'DM Sans', 'Inter', sans-serif;
+    min-height: 100dvh;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3 {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    line-height: 1.15;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: hsl(260 15% 22%); border-radius: 999px; }
+::-webkit-scrollbar-thumb:hover { background: hsl(270 85% 65% / 0.5); }
+
+/* Music player progress bar */
+.progress-bar {
+  -webkit-appearance: none;
+  appearance: none;
+  height: 4px;
+  border-radius: 999px;
+  outline: none;
+  cursor: pointer;
+  background: linear-gradient(to right, hsl(270 85% 65%) var(--progress, 0%), hsl(260 15% 22%) var(--progress, 0%));
+}
+.progress-bar::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: hsl(270 85% 65%);
+  cursor: pointer;
+}
+
+/* Animated gradient for hero */
+.muze-gradient {
+  background: linear-gradient(135deg,
+    hsl(270 85% 16%) 0%,
+    hsl(280 60% 10%) 40%,
+    hsl(340 75% 14%) 100%);
+  position: relative;
+}
+.muze-gradient::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 70% 60% at 80% 50%, hsl(270 85% 65% / 0.12) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+/* Glassmorphism card */
+.glass-card {
+  background: hsl(260 18% 9% / 0.92);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid hsl(260 15% 22%);
+}
+
+/* Purple glow shadow utility */
+.glow-primary {
+  box-shadow: 0 0 24px hsl(270 85% 65% / 0.25), 0 4px 16px hsl(270 85% 65% / 0.15);
+}
+.glow-primary-sm {
+  box-shadow: 0 0 12px hsl(270 85% 65% / 0.3);
+}
+
+/* Song card hover glow */
+.song-card-hover {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.song-card-hover:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 32px hsl(270 85% 65% / 0.18), 0 4px 12px hsl(0 0% 0% / 0.4);
+}
+
+/* Section label pill */
+.section-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: hsl(270 85% 65% / 0.12);
+  border: 1px solid hsl(270 85% 65% / 0.2);
+  color: hsl(270 85% 78%);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Vinyl spin animation */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.vinyl-spin {
+  animation: spin-slow 8s linear infinite;
+}
+.vinyl-paused {
+  animation-play-state: paused;
+}
+
+/* Genre badge colors */
+.genre-rb { background: hsl(270 60% 25%); color: hsl(270 85% 80%); }
+.genre-trap { background: hsl(340 60% 20%); color: hsl(340 75% 75%); }
+.genre-christian { background: hsl(200 60% 20%); color: hsl(200 70% 75%); }
+.genre-default { background: hsl(260 15% 18%); color: hsl(270 10% 70%); }
+
+/* Waveform bars animation */
+@keyframes wave {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+.waveform-bar {
+  animation: wave 0.8s ease-in-out infinite;
+}
+.waveform-bar:nth-child(2) { animation-delay: 0.1s; }
+.waveform-bar:nth-child(3) { animation-delay: 0.2s; }
+.waveform-bar:nth-child(4) { animation-delay: 0.15s; }
+
+/* Share button hover effects */
+.social-tiktok:hover { background: hsl(0 0% 0%); color: white; }
+.social-instagram:hover { background: linear-gradient(45deg, #f09433, #e6683c, #dc2743, #cc2366, #bc1888); color: white; }
+.social-facebook:hover { background: #1877f2; color: white; }
+.social-youtube:hover { background: #ff0000; color: white; }
