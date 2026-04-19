@@ -3,6 +3,29 @@ import { type Server } from "http";
 import { storage } from "./storage";
 import { insertSongSchema, insertPlaylistSchema, insertOrderSchema } from "@shared/schema";
 import { z } from "zod";
+import multer from "multer";
+import path from "path";
+import fs from "fs";
+
+// ─── Multer: MP3 + image upload storage ───────────────────────────────────────
+const uploadsDir = path.join(process.cwd(), "uploads");
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+
+const upload = multer({
+  storage: multer.diskStorage({
+    destination: (_req, _file, cb) => cb(null, uploadsDir),
+    filename: (_req, file, cb) => {
+      const safe = file.originalname.replace(/[^a-zA-Z0-9._-]/g, "_");
+      cb(null, `${Date.now()}-${safe}`);
+    },
+  }),
+  limits: { fileSize: 50 * 1024 * 1024 }, // 50 MB max
+  fileFilter: (_req, file, cb) => {
+    const allowed = ["audio/mpeg", "audio/mp3", "audio/wav", "audio/x-wav",
+      "image/jpeg", "image/png", "image/webp"];
+    cb(null, allowed.includes(file.mimetype));
+  },
+});
 
 // ─── Security helpers ────────────────────────────────────────────────────────
 function getClientIp(req: any): string {
@@ -903,6 +926,78 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
     return res.json({ questions: [artist.sq1, artist.sq2, artist.sq3] });
   });
 
+  // ── Serve uploaded files statically ────────────────────────────────────────────
+  app.use("/uploads", (req: any, res: any, next: any) => {
+    // Simple security: prevent directory traversal
+    const safePath = path.normalize(req.path).replace(/^(\.\.\/)+/, "");
+    const fullPath = path.join(uploadsDir, safePath);
+    if (!fullPath.startsWith(uploadsDir)) return res.status(403).json({ error: "Forbidden" });
+    res.sendFile(fullPath, (err: any) => { if (err) next(); });
+  });
+
+  // ── POST /api/upload/song ──────────────────────────────────────────────────────
+  // Accepts: audio file (mp3), optional cover image, + song metadata
+  app.post("/api/upload/song",
+    requireAuth,
+    upload.fields([
+      { name: "audio", maxCount: 1 },
+      { name: "cover", maxCount: 1 },
+    ]),
+    (req: any, res: any) => {
+      try {
+        const files = req.files as Record<string, Express.Multer.File[]>;
+        const audioFile = files?.audio?.[0];
+        const coverFile = files?.cover?.[0];
+
+        if (!audioFile) return res.status(400).json({ error: "MP3 file is required." });
+
+        const baseUrl = `${req.protocol}://${req.get("host")}`;
+        const audioUrl = `${baseUrl}/uploads/${audioFile.filename}`;
+        const coverUrl = coverFile ? `${baseUrl}/uploads/${coverFile.filename}` : null;
+
+        // Parse metadata from form fields
+        const title = req.body.title || audioFile.originalname.replace(/\.[^/.]+$/, "");
+        const artist = req.body.artist || req.artistPayload?.name || "MUZE";
+        const genre = req.body.genre || "R&B";
+        const price = parseFloat(req.body.price) || 1.99;
+        const album = req.body.album || null;
+        const bpm = req.body.bpm ? parseInt(req.body.bpm) : null;
+        const duration = req.body.duration ? parseInt(req.body.duration) : 0;
+        const featured = req.body.featured === "true";
+
+        const song = storage.createSong({
+          title,
+          artist,
+          genre,
+          price,
+          album,
+          bpm,
+          duration,
+          featured,
+          audioUrl,
+          coverUrl,
+          description: req.body.description || null,
+          lyrics: req.body.lyrics || null,
+          releaseYear: req.body.releaseYear ? parseInt(req.body.releaseYear) : new Date().getFullYear(),
+          keySignature: req.body.keySignature || null,
+        });
+
+        return res.status(201).json({ song, audioUrl, coverUrl });
+      } catch (err: any) {
+        return res.status(500).json({ error: err.message || "Upload failed" });
+      }
+    },
+  );
+
+  // ── POST /api/upload/cover ───────────────────────────────────────────────────
+  // Upload a cover image only (for updating existing songs)
+  app.post("/api/upload/cover", requireAuth, upload.single("cover"), (req: any, res: any) => {
+    if (!req.file) return res.status(400).json({ error: "Image file required." });
+    const baseUrl = `${req.protocol}://${req.get("host")}`;
+    const coverUrl = `${baseUrl}/uploads/${req.file.filename}`;
+    res.json({ coverUrl });
+  });
+
   // ── POST /api/auth/resend-verification ──────────────────────────────────────
   // Since no real SMTP is configured, we auto-verify the account immediately.
   // This is the "Activate My Account" button on LoginPage.
@@ -928,6 +1023,19 @@ export async function registerRoutes(httpServer: Server, app: Express): Promise<
   // ADMIN ROUTES  (protected by JWT + admin email whitelist)
   // ──────────────────────────────────────────────────────────────────────
   const ADMIN_EMAILS = ["sheldoncooper601@gmail.com", "sheldoncooper601@yahoo.com"];
+
+  // requireAuth — any verified artist can pass
+  function requireAuth(req: any, res: any, next: () => void) {
+    const auth = req.headers.authorization;
+    if (!auth?.startsWith("Bearer ")) return res.status(401).json({ error: "Not authenticated." });
+    try {
+      const payload = jwt.verify(auth.slice(7), JWT_SECRET) as any;
+      req.artistPayload = payload;
+      next();
+    } catch {
+      return res.status(401).json({ error: "Invalid or expired token." });
+    }
+  }
 
   function requireAdmin(req: any, res: any, next: () => void) {
     const auth = req.headers.authorization;

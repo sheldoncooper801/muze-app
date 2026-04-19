@@ -2,7 +2,7 @@ import { Link, useLocation } from "wouter";
 import {
   Home, ShoppingBag, ListMusic, Share2, Music2, Zap, Heart, Users,
   Sliders, Quote, BarChart2, Ticket, CreditCard, TrendingUp, LogIn,
-  UserCircle, LogOut, Shield,
+  UserCircle, LogOut, Shield, Upload, Sparkles,
 } from "lucide-react";
 import MiniPlayer from "./MiniPlayer";
 import { useAuth } from "@/context/AuthContext";
@@ -30,11 +30,18 @@ const navSections = [
     ],
   },
   {
+    label: "Artist Tools",
+    items: [
+      { href: "/upload", label: "Upload Music", icon: Upload },
+      { href: "/social-generator", label: "Social Posts", icon: Sparkles },
+      { href: "/earnings", label: "Earnings", icon: TrendingUp },
+    ],
+  },
+  {
     label: "Support",
     items: [
       { href: "/checkout", label: "Support / Gift", icon: CreditCard },
       { href: "/tip", label: "Support MUZE", icon: Heart },
-      { href: "/earnings", label: "Earnings", icon: TrendingUp },
       { href: "/marketing", label: "Share", icon: Share2 },
     ],
   },

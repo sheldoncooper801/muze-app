@@ -2,8 +2,7 @@ import { build as esbuild } from "esbuild";
 import { build as viteBuild } from "vite";
 import { rm, readFile } from "fs/promises";
 
-// Only keep native/binary modules as external (they can't be bundled)
-// Everything else gets bundled so Render doesn't need to find node_modules
+// Modules that cannot be bundled (native addons only)
 const allowlist = [
   "better-sqlite3", // native addon — must stay external
   "bufferutil",     // native addon

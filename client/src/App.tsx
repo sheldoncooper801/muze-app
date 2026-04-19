@@ -28,6 +28,8 @@ import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
 import VerifyEmailPage from "@/pages/VerifyEmailPage";
 import AdminPage from "@/pages/AdminPage";
+import UploadPage from "@/pages/UploadPage";
+import SocialGeneratorPage from "@/pages/SocialGeneratorPage";
 import NotFound from "@/pages/not-found";
 
 const AUTH_PATHS = ["/register", "/login", "/forgot-password", "/reset-password", "/verify-email"];
@@ -69,6 +71,8 @@ function AppInner() {
         <Route path="/wrapped" component={MuzeWrapped} />
         <Route path="/events" component={EventsPage} />
         <Route path="/admin" component={AdminPage} />
+        <Route path="/upload" component={UploadPage} />
+        <Route path="/social-generator" component={SocialGeneratorPage} />
         <Route component={NotFound} />
       </Switch>
     </Layout>
