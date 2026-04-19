@@ -2,7 +2,7 @@ services:
   - type: web
     name: muze-app
     runtime: node
-    buildCommand: npm install --include=dev && npm rebuild better-sqlite3
+    buildCommand: npm install --include=dev && npm run build && npm rebuild better-sqlite3
     startCommand: npm start
     plan: free
     envVars:
